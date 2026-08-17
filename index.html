@@ -138,12 +138,14 @@
                 <h2 id="cat-form-title" class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-tags text-indigo-600"></i> Add Business Category
                 </h2>
-                <form onsubmit="saveCategory(event)" class="flex gap-4">
+                <form onsubmit="saveCategory(event)" class="space-y-4">
                     <input type="hidden" id="edit-cat-index" value="">
                     <input type="hidden" id="old-cat-name" value="">
-                    <input type="text" id="category-name" placeholder="e.g. Education, Travel, Retail" required class="flex-1 px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button type="submit" id="cat-save-btn" class="bg-indigo-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm hover:bg-indigo-700 transition shadow">Add</button>
-                    <button type="button" id="cat-cancel-btn" onclick="resetCategoryForm()" class="hidden bg-gray-500 text-white font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-gray-600 transition shadow">Cancel</button>
+                    <input type="text" id="category-name" placeholder="e.g. Education, Travel, Retail" required class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="flex gap-2">
+                        <button type="submit" id="cat-save-btn" class="flex-1 bg-indigo-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm hover:bg-indigo-700 transition shadow">Add Category</button>
+                        <button type="button" id="cat-cancel-btn" onclick="resetCategoryForm()" class="hidden bg-gray-500 text-white font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-gray-600 transition shadow">Cancel</button>
+                    </div>
                 </form>
             </div>
 
@@ -284,17 +286,14 @@
             if(!catName) return;
 
             if(editIndex === "") {
-                // Add new
                 if(!categories.includes(catName)) {
                     categories.push(catName);
                 }
             } else {
-                // Update existing category
                 const idx = parseInt(editIndex);
                 if(oldName !== catName) {
                     categories[idx] = catName;
                     
-                    // Cascade Update: Update category name in all clients belonging to this old category
                     for(let client of clients) {
                         if(client.category === oldName) {
                             client.category = catName;
@@ -320,7 +319,7 @@
             document.getElementById('old-cat-name').value = categories[index];
             document.getElementById('category-name').value = categories[index];
             document.getElementById('cat-form-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-indigo-600"></i> Edit Business Category`;
-            document.getElementById('cat-save-btn').innerText = "Update";
+            document.getElementById('cat-save-btn').innerText = "Update Category";
             document.getElementById('cat-cancel-btn').classList.remove('hidden');
         }
 
@@ -329,7 +328,7 @@
             document.getElementById('old-cat-name').value = "";
             document.getElementById('category-name').value = "";
             document.getElementById('cat-form-title').innerHTML = `<i class="fa-solid fa-tags text-indigo-600"></i> Add Business Category`;
-            document.getElementById('cat-save-btn').innerText = "Add";
+            document.getElementById('cat-save-btn').innerText = "Add Category";
             document.getElementById('cat-cancel-btn').classList.add('hidden');
         }
 
@@ -384,7 +383,6 @@
             selectEl.value = currentVal || 'ALL';
         }
 
-        // Client Save (Add or Update)
         window.saveClient = async function(e) {
             e.preventDefault();
             const editId = document.getElementById('edit-client-id').value;
