@@ -169,8 +169,8 @@
                         <textarea id="promo-msg" rows="4" class="w-full p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">Hello, transform your business with 3i Design Empire. We build professional websites, mobile apps, and digital solutions. Contact us today to get started!</textarea>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Attach Media Link (Image / Video / Banner URL):</label>
-                        <input type="text" id="promo-media" placeholder="https://example.com/banner.jpg" class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Upload Media File (Photo / Video from your device):</label>
+                        <input type="file" id="promo-file" accept="image/*,video/*" class="w-full px-4 py-2 border rounded-xl text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                     </div>
                 </div>
             </div>
@@ -397,7 +397,6 @@
 
             const selectedCat = document.getElementById('promo-category-filter').value;
             
-            // Filter clients based on selected category dropdown
             const filteredClients = clients.filter(c => {
                 if(selectedCat === 'ALL') return true;
                 return c.category === selectedCat;
@@ -433,17 +432,21 @@
 
         window.sendWhatsApp = function(phone) {
             const msg = document.getElementById('promo-msg').value;
-            const media = document.getElementById('promo-media').value;
+            const fileInput = document.getElementById('promo-file');
+            let fileName = fileInput.files.length > 0 ? `[Attached File: ${fileInput.files[0].name}]` : '';
+            
             const cleanPhone = phone.replace(/[^0-9]/g, '');
-            const fullText = encodeURIComponent(`${msg}\n\nMedia: ${media}`);
+            const fullText = encodeURIComponent(`${msg}\n\n${fileName}`);
             window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${fullText}`, '_blank');
         }
 
         window.sendTelegram = function(phone) {
             const msg = document.getElementById('promo-msg').value;
-            const media = document.getElementById('promo-media').value;
+            const fileInput = document.getElementById('promo-file');
+            let fileName = fileInput.files.length > 0 ? `[Attached File: ${fileInput.files[0].name}]` : '';
+
             const cleanPhone = phone.replace(/[^0-9]/g, '');
-            const fullText = encodeURIComponent(`${msg}\n\nMedia: ${media}`);
+            const fullText = encodeURIComponent(`${msg}\n\n${fileName}`);
             window.open(`https://t.me/${cleanPhone}?text=${fullText}`, '_blank');
         }
 
@@ -453,9 +456,11 @@
                 return;
             }
             const msg = document.getElementById('promo-msg').value;
-            const media = document.getElementById('promo-media').value;
+            const fileInput = document.getElementById('promo-file');
+            let fileName = fileInput.files.length > 0 ? `\nNote: Please attach file (${fileInput.files[0].name}) manually.` : '';
+
             const subject = encodeURIComponent("Special Promotion from 3i Design Empire");
-            const body = encodeURIComponent(`${msg}\n\nMedia Link: ${media}`);
+            const body = encodeURIComponent(`${msg}${fileName}`);
             window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
         }
     </script>
