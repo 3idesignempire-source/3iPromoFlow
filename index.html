@@ -80,7 +80,7 @@
             <div class="mt-4 md:mt-0 flex gap-2 items-center flex-wrap">
                 <button onclick="switchTab('clients')" id="btn-clients" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold transition shadow">Manage Clients</button>
                 <button onclick="switchTab('categories')" id="btn-categories" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-semibold transition shadow">Categories</button>
-                <button onclick="switchTab('promo')" id="btn-promo" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-semibold transition shadow">Promotion Message</button>
+                <button onclick="switchTab('promo')" id="btn-promo" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-semibold transition shadow">Promotion & Broadcast</button>
                 <button onclick="logout()" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm transition shadow ml-2" title="Logout"><i class="fa-solid fa-power-off"></i></button>
             </div>
         </header>
@@ -106,7 +106,7 @@
             <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <i class="fa-solid fa-users text-indigo-600"></i> Client Directory & Individual Actions
+                        <i class="fa-solid fa-users text-indigo-600"></i> Client Directory
                     </h2>
                 </div>
                 <div class="overflow-x-auto">
@@ -118,7 +118,7 @@
                                 <th class="p-3">Email</th>
                                 <th class="p-3">Category</th>
                                 <th class="p-3">Description</th>
-                                <th class="p-3 text-center">Actions (WhatsApp / Telegram / Email / Delete)</th>
+                                <th class="p-3 text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody id="client-table-body">
@@ -149,22 +149,44 @@
             </div>
         </div>
 
-        <!-- TAB 3: PROMOTION MESSAGE TEMPLATE -->
+        <!-- TAB 3: PROMOTION MESSAGE & ACTIVE CLIENT BUTTONS -->
         <div id="tab-promo" class="hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 max-w-2xl">
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
                 <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-bullhorn text-indigo-600"></i> Set Default Promotion Content
+                    <i class="fa-solid fa-bullhorn text-indigo-600"></i> Promotion Message Composer
                 </h2>
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Default Message Content:</label>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Type Promotion Message:</label>
                         <textarea id="promo-msg" rows="4" class="w-full p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">Hello, transform your business with 3i Design Empire. We build professional websites, mobile apps, and digital solutions. Contact us today to get started!</textarea>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">Attach Media Link (Image / Video / Banner URL):</label>
                         <input type="text" id="promo-media" placeholder="https://example.com/banner.jpg" class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
-                    <p class="text-xs text-green-600 font-semibold"><i class="fa-solid fa-check-circle mr-1"></i> Content is saved automatically and used when you click individual client action buttons.</p>
+                </div>
+            </div>
+
+            <!-- Active Clients List with Direct Send Buttons -->
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane text-indigo-600"></i> Active Clients (Click to Send Message)
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-700 border-b">
+                                <th class="p-3">Client Name</th>
+                                <th class="p-3">Phone</th>
+                                <th class="p-3">Category</th>
+                                <th class="p-3 text-center">Send via WhatsApp / Telegram / Email</th>
+                            </tr>
+                        </thead>
+                        <tbody id="promo-client-table-body">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -232,6 +254,7 @@
                 renderCategories();
                 renderCategoryDropdown();
                 renderClients();
+                renderPromoClients();
             } catch (error) {
                 console.error("Error loading data from Firebase:", error);
             }
@@ -328,18 +351,42 @@
                     <td class="p-3 text-gray-600">${client.email || '-'}</td>
                     <td class="p-3"><span class="bg-indigo-50 text-indigo-700 text-xs px-2.5 py-1 rounded-full font-bold">${client.category || 'General'}</span></td>
                     <td class="p-3 text-gray-600">${client.desc}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteClient('${client.id}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs transition shadow" title="Delete Client">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderPromoClients() {
+            const tbody = document.getElementById('promo-client-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            if(clients.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400">No clients found. Please add clients in 'Manage Clients' tab.</td></tr>`;
+                return;
+            }
+
+            clients.forEach(client => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-gray-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-gray-800">${client.name}</td>
+                    <td class="p-3 text-gray-600">${client.phone}</td>
+                    <td class="p-3"><span class="bg-indigo-50 text-indigo-700 text-xs px-2.5 py-1 rounded-full font-bold">${client.category || 'General'}</span></td>
                     <td class="p-3 text-center flex justify-center gap-2">
-                        <button onclick="sendWhatsApp('${client.phone}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow flex items-center gap-1" title="Send WhatsApp">
-                            <i class="fa-brands fa-whatsapp"></i> WA
+                        <button onclick="sendWhatsApp('${client.phone}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow flex items-center gap-1">
+                            <i class="fa-brands fa-whatsapp"></i> WhatsApp
                         </button>
-                        <button onclick="sendTelegram('${client.phone}')" class="bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow flex items-center gap-1" title="Send Telegram">
-                            <i class="fa-brands fa-telegram"></i> TG
+                        <button onclick="sendTelegram('${client.phone}')" class="bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow flex items-center gap-1">
+                            <i class="fa-brands fa-telegram"></i> Telegram
                         </button>
-                        <button onclick="sendEmail('${client.email}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow flex items-center gap-1" title="Send Email">
+                        <button onclick="sendEmail('${client.email}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition shadow flex items-center gap-1">
                             <i class="fa-solid fa-envelope"></i> Email
-                        </button>
-                        <button onclick="deleteClient('${client.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1.5 rounded-lg text-xs transition shadow" title="Delete Client">
-                            <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
                 `;
