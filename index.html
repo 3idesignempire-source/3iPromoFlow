@@ -167,17 +167,6 @@
                         <label class="block text-xs font-bold text-gray-600 mb-1">Type Promotion Message:</label>
                         <textarea id="promo-msg" rows="4" class="w-full p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">Hello, transform your business with 3i Design Empire. We build professional websites, mobile apps, and digital solutions. Contact us today to get started!</textarea>
                     </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Upload Media File (Photo / Video from your device):</label>
-                        <input type="file" id="promo-file" accept="image/*,video/*" onchange="previewMedia(event)" class="w-full px-4 py-2 border rounded-xl text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                    </div>
-
-                    <!-- Media Preview Box -->
-                    <div id="media-preview-container" class="hidden mt-4 p-4 border rounded-xl bg-gray-50 max-w-md">
-                        <p class="text-xs font-bold text-gray-500 mb-2">Media Preview:</p>
-                        <div id="media-preview-content"></div>
-                    </div>
                 </div>
             </div>
 
@@ -210,7 +199,6 @@
     <script>
         let clients = [];
         let categories = ["Education", "Travel", "Retail", "F&B", "Corporate"];
-        let uploadedMediaDataUrl = "";
 
         function handleLogin(e) {
             e.preventDefault();
@@ -435,56 +423,17 @@
             });
         }
 
-        window.previewMedia = function(event) {
-            const file = event.target.files[0];
-            const container = document.getElementById('media-preview-container');
-            const content = document.getElementById('media-preview-content');
-            
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    uploadedMediaDataUrl = e.target.result;
-                    container.classList.remove('hidden');
-                    
-                    if (file.type.startsWith('image/')) {
-                        content.innerHTML = `<img src="${uploadedMediaDataUrl}" class="max-h-48 rounded-lg shadow mx-auto">`;
-                    } else if (file.type.startsWith('video/')) {
-                        content.innerHTML = `<video src="${uploadedMediaDataUrl}" controls class="max-h-48 rounded-lg shadow mx-auto"></video>`;
-                    } else {
-                        content.innerHTML = `<p class="text-xs text-gray-600 font-semibold"><i class="fa-solid fa-file mr-1"></i> ${file.name}</p>`;
-                    }
-                }
-                reader.readAsDataURL(file);
-            } else {
-                container.classList.add('hidden');
-                content.innerHTML = '';
-                uploadedMediaDataUrl = "";
-            }
-        }
-
         window.sendWhatsApp = function(phone) {
             const msg = document.getElementById('promo-msg').value;
             const cleanPhone = phone.replace(/[^0-9]/g, '');
-            
-            let fullText = msg;
-            if (uploadedMediaDataUrl) {
-                fullText += `\n\n[Attached Media Content Attached]`;
-            }
-
-            const encodedText = encodeURIComponent(fullText);
+            const encodedText = encodeURIComponent(msg);
             window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodedText}`, '_blank');
         }
 
         window.sendTelegram = function(phone) {
             const msg = document.getElementById('promo-msg').value;
             const cleanPhone = phone.replace(/[^0-9]/g, '');
-            
-            let fullText = msg;
-            if (uploadedMediaDataUrl) {
-                fullText += `\n\n[Attached Media Content Attached]`;
-            }
-
-            const encodedText = encodeURIComponent(fullText);
+            const encodedText = encodeURIComponent(msg);
             window.open(`https://t.me/${cleanPhone}?text=${encodedText}`, '_blank');
         }
 
