@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3i PromoFlow - Client & Promotion Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="max-w-6xl mx-auto p-4 md:p-6">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-slate-900 to-indigo-900 text-white p-6 rounded-2xl shadow-lg mb-6 flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-bolt text-yellow-400"></i> 3i PromoFlow
+                </h1>
+                <p class="text-xs text-indigo-200 mt-1">3i Design Empire - Marketing & Client CRM System</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-2">
+                <button onclick="switchTab('clients')" id="btn-clients" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold transition shadow">Manage Clients</button>
+                <button onclick="switchTab('promo')" id="btn-promo" class="px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-semibold transition shadow">Promotion Broadcast</button>
+            </div>
+        </header>
+
+        <!-- TAB 1: MANAGE CLIENTS -->
+        <div id="tab-clients" class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-indigo-600"></i> Add Target Client
+                </h2>
+                <form id="client-form" onsubmit="addClient(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input type="text" id="client-name" placeholder="Client Name" required class="px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="text" id="client-phone" placeholder="Phone (+60123456789)" required class="px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="text" id="client-desc" placeholder="Description / Business Type" required class="px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" class="bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-indigo-700 transition shadow"><i class="fa-solid fa-save mr-1"></i> Save Client</button>
+                </form>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fa-solid fa-users text-indigo-600"></i> Target Client List
+                    </h2>
+                    <span id="active-count" class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-full">Active: 0</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-700 border-b">
+                                <th class="p-3">Status (Active)</th>
+                                <th class="p-3">Name</th>
+                                <th class="p-3">Phone</th>
+                                <th class="p-3">Description</th>
+                                <th class="p-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="client-table-body">
+                            <!-- Dynamic Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: PROMOTION BROADCAST -->
+        <div id="tab-promo" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-bullhorn text-indigo-600"></i> Create Promotion & Broadcast
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Promotion Message Content:</label>
+                        <textarea id="promo-msg" rows="4" placeholder="Enter your service promotion details here..." class="w-full p-3 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">Hello Ji! Transform your business with 3i Design Empire. We build professional websites, mobile apps & digital solutions. Contact us today!</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Attach Media Link (Image / Video / Banner URL):</label>
+                        <input type="text" id="promo-media" placeholder="https://example.com/banner.jpg" class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    
+                    <div class="border-t pt-4 flex flex-wrap gap-4 items-center justify-between">
+                        <p class="text-xs text-gray-500"><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> Only clients with <b>Active</b> status will be targeted.</p>
+                        <div class="flex gap-3">
+                            <button onclick="sendWhatsAppBroadcast()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow flex items-center gap-2">
+                                <i class="fa-brands fa-whatsapp text-lg"></i> Send via WhatsApp
+                            </button>
+                            <button onclick="sendTelegramBroadcast()" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow flex items-center gap-2">
+                                <i class="fa-brands fa-telegram text-lg"></i> Send via Telegram
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let clients = JSON.parse(localStorage.getItem('3i_promo_flow_clients')) || [
+            { id: 1, name: "Raja Kumar", phone: "+60123456789", desc: "Retail Shop Owner", active: true },
+            { id: 2, name: "Siti Nurhaliza", phone: "+60198765432", desc: "Kindergarten Director", active: true }
+        ];
+
+        function switchTab(tab) {
+            if(tab === 'clients') {
+                document.getElementById('tab-clients').classList.remove('hidden');
+                document.getElementById('tab-promo').classList.add('hidden');
+                document.getElementById('btn-clients').className = "px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold transition shadow";
+                document.getElementById('btn-promo').className = "px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-semibold transition shadow";
+            } else {
+                document.getElementById('tab-clients').classList.add('hidden');
+                document.getElementById('tab-promo').classList.remove('hidden');
+                document.getElementById('btn-promo').className = "px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold transition shadow";
+                document.getElementById('btn-clients').className = "px-4 py-2 bg-slate-800 text-white rounded-xl text-sm font-semibold transition shadow";
+            }
+        }
+
+        function renderClients() {
+            const tbody = document.getElementById('client-table-body');
+            tbody.innerHTML = '';
+            let activeCount = 0;
+
+            clients.forEach(client => {
+                if(client.active) activeCount++;
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-gray-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <input type="checkbox" ${client.active ? 'checked' : ''} onchange="toggleActive(${client.id})" class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
+                    </td>
+                    <td class="p-3 font-semibold text-gray-800">${client.name}</td>
+                    <td class="p-3 text-gray-600">${client.phone}</td>
+                    <td class="p-3 text-gray-600">${client.desc}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteClient(${client.id})" class="text-red-500 hover:text-red-700 transition"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('active-count').innerText = `Active: ${activeCount}`;
+            localStorage.setItem('3i_promo_flow_clients', JSON.stringify(clients));
+        }
+
+        function addClient(e) {
+            e.preventDefault();
+            const name = document.getElementById('client-name').value;
+            const phone = document.getElementById('client-phone').value;
+            const desc = document.getElementById('client-desc').value;
+
+            clients.push({ id: Date.now(), name, phone, desc, active: true });
+            document.getElementById('client-form').reset();
+            renderClients();
+        }
+
+        function toggleActive(id) {
+            const client = clients.find(c => c.id === id);
+            if(client) {
+                client.active = !client.active;
+                renderClients();
+            }
+        }
+
+        function deleteClient(id) {
+            clients = clients.filter(c => c.id !== id);
+            renderClients();
+        }
+
+        function sendWhatsAppBroadcast() {
+            const msg = document.getElementById('promo-msg').value;
+            const media = document.getElementById('promo-media').value;
+            const activeClients = clients.filter(c => c.active);
+
+            if(activeClients.length === 0) {
+                alert("No active clients found to send promotion!");
+                return;
+            }
+
+            const firstClient = activeClients[0];
+            const cleanPhone = firstClient.phone.replace(/[^0-9]/g, '');
+            const fullText = encodeURIComponent(`${msg}\n\nMedia Link: ${media}`);
+            
+            window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${fullText}`, '_blank');
+            alert(`WhatsApp broadcast started for ${firstClient.name}. (Browser security allows opening client chats sequentially).`);
+        }
+
+        function sendTelegramBroadcast() {
+            const msg = document.getElementById('promo-msg').value;
+            const media = document.getElementById('promo-media').value;
+            const activeClients = clients.filter(c => c.active);
+            
+            if(activeClients.length === 0) {
+                alert("No active clients found to send promotion!");
+                return;
+            }
+
+            const text = encodeURIComponent(`${msg}\n\n${media}`);
+            window.open(`https://t.me/share/url?url=&text=${text}`, '_blank');
+        }
+
+        renderClients();
+    </script>
+</body>
+</html>
