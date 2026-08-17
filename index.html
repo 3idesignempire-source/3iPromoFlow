@@ -142,7 +142,7 @@
                     </div>
                     
                     <div class="border-t pt-4 flex flex-wrap gap-4 items-center justify-between">
-                        <p class="text-xs text-gray-500"><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> Select active clients to broadcast promotional updates.</p>
+                        <p class="text-xs text-gray-500"><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> Selecting active clients will open WhatsApp chats for all of them.</p>
                         <div class="flex gap-3 flex-wrap">
                             <button onclick="sendWhatsAppBroadcast()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition shadow flex items-center gap-2">
                                 <i class="fa-brands fa-whatsapp text-lg"></i> Send via WhatsApp
@@ -288,6 +288,7 @@
             if(countEl) countEl.innerText = `Active: ${activeCount}`;
         }
 
+        // Open WhatsApp chats for all active clients sequentially with a slight delay
         window.sendWhatsAppBroadcast = function() {
             const msg = document.getElementById('promo-msg').value;
             const media = document.getElementById('promo-media').value;
@@ -298,11 +299,15 @@
                 return;
             }
 
-            const firstClient = activeClients[0];
-            const cleanPhone = firstClient.phone.replace(/[^0-9]/g, '');
             const fullText = encodeURIComponent(`${msg}\n\nMedia: ${media}`);
             
-            window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${fullText}`, '_blank');
+            // Loop through each active client and open WhatsApp chat
+            activeClients.forEach((client, index) => {
+                const cleanPhone = client.phone.replace(/[^0-9]/g, '');
+                setTimeout(() => {
+                    window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${fullText}`, '_blank');
+                }, index * 500); // 500ms gap to let browser open tabs smoothly
+            });
         }
 
         window.sendTelegramBroadcast = function() {
@@ -319,7 +324,6 @@
             const cleanPhone = firstClient.phone.replace(/[^0-9]/g, '');
             const fullText = encodeURIComponent(`${msg}\n\nMedia: ${media}`);
             
-            // Direct chat open link for Telegram
             window.open(`https://t.me/${cleanPhone}?text=${fullText}`, '_blank');
         }
 
