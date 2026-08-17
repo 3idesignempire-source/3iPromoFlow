@@ -90,9 +90,10 @@
                 <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                     <i class="fa-solid fa-user-plus text-indigo-600"></i> Add Target Client
                 </h2>
-                <form id="client-form" onsubmit="addClient(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <form id="client-form" onsubmit="addClient(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <input type="text" id="client-name" placeholder="Client Name" required class="px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
                     <input type="text" id="client-phone" placeholder="Phone (+60123456789)" required class="px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="email" id="client-email" placeholder="Email Address (Optional)" class="px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
                     <input type="text" id="client-desc" placeholder="Description / Business Type" required class="px-4 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
                     <button type="submit" class="bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-indigo-700 transition shadow"><i class="fa-solid fa-save mr-1"></i> Save Client</button>
                 </form>
@@ -112,6 +113,7 @@
                                 <th class="p-3">Status (Active)</th>
                                 <th class="p-3">Name</th>
                                 <th class="p-3">Phone</th>
+                                <th class="p-3">Email</th>
                                 <th class="p-3">Description</th>
                                 <th class="p-3 text-center">Action</th>
                             </tr>
@@ -141,12 +143,15 @@
                     
                     <div class="border-t pt-4 flex flex-wrap gap-4 items-center justify-between">
                         <p class="text-xs text-gray-500"><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> Select active clients to broadcast promotional updates.</p>
-                        <div class="flex gap-3">
-                            <button onclick="sendWhatsAppBroadcast()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow flex items-center gap-2">
+                        <div class="flex gap-3 flex-wrap">
+                            <button onclick="sendWhatsAppBroadcast()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition shadow flex items-center gap-2">
                                 <i class="fa-brands fa-whatsapp text-lg"></i> Send via WhatsApp
                             </button>
-                            <button onclick="sendTelegramBroadcast()" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition shadow flex items-center gap-2">
+                            <button onclick="sendTelegramBroadcast()" class="bg-sky-500 hover:bg-sky-600 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition shadow flex items-center gap-2">
                                 <i class="fa-brands fa-telegram text-lg"></i> Send via Telegram
+                            </button>
+                            <button onclick="sendEmailBroadcast()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition shadow flex items-center gap-2">
+                                <i class="fa-solid fa-envelope text-lg"></i> Send via Email
                             </button>
                         </div>
                     </div>
@@ -213,10 +218,11 @@
             e.preventDefault();
             const name = document.getElementById('client-name').value;
             const phone = document.getElementById('client-phone').value;
+            const email = document.getElementById('client-email').value || '';
             const desc = document.getElementById('client-desc').value;
             const id = 'client_' + Date.now();
 
-            const newClient = { name, phone, desc, active: true };
+            const newClient = { name, phone, email, desc, active: true };
 
             try {
                 await window.dbSet(window.dbRef(window.db, 'clients/' + id), newClient);
@@ -234,6 +240,7 @@
                 await window.dbSet(window.dbRef(window.db, 'clients/' + id), {
                     name: client.name,
                     phone: client.phone,
+                    email: client.email || '',
                     desc: client.desc,
                     active: client.active
                 });
@@ -268,6 +275,7 @@
                     </td>
                     <td class="p-3 font-semibold text-gray-800">${client.name}</td>
                     <td class="p-3 text-gray-600">${client.phone}</td>
+                    <td class="p-3 text-gray-600">${client.email || '-'}</td>
                     <td class="p-3 text-gray-600">${client.desc}</td>
                     <td class="p-3 text-center">
                         <button onclick="deleteClient('${client.id}')" class="text-red-500 hover:text-red-700 transition"><i class="fa-solid fa-trash"></i></button>
@@ -307,10 +315,29 @@
                 return;
             }
 
-            const text = encodeURIComponent(`${msg}\n\nMedia: ${media}`);
+            const firstClient = activeClients[0];
+            const cleanPhone = firstClient.phone.replace(/[^0-9]/g, '');
+            const fullText = encodeURIComponent(`${msg}\n\nMedia: ${media}`);
             
-            // Fixed Telegram Scheme URL to bypass website home page routing
-            window.open(`tg://msg?text=${text}`, '_blank');
+            // Direct chat open link for Telegram
+            window.open(`https://t.me/${cleanPhone}?text=${fullText}`, '_blank');
+        }
+
+        window.sendEmailBroadcast = function() {
+            const msg = document.getElementById('promo-msg').value;
+            const media = document.getElementById('promo-media').value;
+            const activeClients = clients.filter(c => c.active && c.email && c.email.trim() !== "");
+
+            if(activeClients.length === 0) {
+                alert("No active clients with valid Email addresses found!");
+                return;
+            }
+
+            const emails = activeClients.map(c => c.email).join(',');
+            const subject = encodeURIComponent("Special Promotion from 3i Design Empire");
+            const body = encodeURIComponent(`${msg}\n\nMedia Link: ${media}`);
+
+            window.open(`mailto:${emails}?subject=${subject}&body=${body}`, '_blank');
         }
     </script>
 </body>
