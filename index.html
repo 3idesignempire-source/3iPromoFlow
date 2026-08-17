@@ -311,8 +311,13 @@
                 return;
             }
 
-            const text = encodeURIComponent(`${msg}\n\n${media}\n(Sender ID/Phone: +60185779748)`);
-            window.open(`https://t.me/share/url?url=&text=${text}`, '_blank');
+            const firstClient = activeClients[0];
+            const cleanPhone = firstClient.phone.replace(/[^0-9]/g, '');
+            const text = encodeURIComponent(`${msg}\n\nMedia: ${media}\n(Sent via: +60185779748)`);
+            
+            // Fixed Telegram direct chat link using t.me/{phone}
+            window.open(`https://t.me/${cleanPhone}?text=${text}`, '_blank');
+            alert(`Telegram broadcast initiated from +60185779748 for client ${firstClient.name}.`);
         }
     </script>
 </body>
